@@ -1,3 +1,4 @@
+/*
 package com.jof.batch.controller;
 
 import com.jof.batch.config.SpringBatchConfig;
@@ -15,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class JobController {
 
-    @Autowired
+
     private JobLauncher jobLauncher;
-    @Autowired
+
     private Job job;
 
     @Autowired
@@ -40,3 +41,4 @@ public class JobController {
     }
 
 }
+*/

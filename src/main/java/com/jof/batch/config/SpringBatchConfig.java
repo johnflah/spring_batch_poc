@@ -1,3 +1,4 @@
+/*
 package com.jof.batch.config;
 
 import com.jof.batch.entity.Customer;
@@ -109,3 +110,4 @@ public class SpringBatchConfig {
 
 
 }
+*/
