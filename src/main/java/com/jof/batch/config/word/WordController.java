@@ -1,4 +1,4 @@
-package com.jof.batch.controller;
+package com.jof.batch.config.word;
 
 import com.jof.batch.config.MidBatchConfig;
 import lombok.extern.slf4j.Slf4j;
@@ -20,31 +20,34 @@ import java.util.Date;
 
 
 @RestController
-@RequestMapping("/mids")
+@RequestMapping("/words")
 @Slf4j
-public class MidController {
+public class WordController {
 
 
     @Autowired
     JobLauncher jobLauncher;
 
-    @Qualifier("midJob")
     @Autowired
-    Job job;
+    @Qualifier("importWordsJob")
+    private Job importWordsJob;
 
     @Autowired
-    MidBatchConfig midBatchConfig;
+    @Qualifier("midJob")
+    private Job midJob;
+
+
 
 
     @PostMapping
-    @RequestMapping("/importMerchants")
+    @RequestMapping("/import")
     public void startImportCSVJob(){
 
         try {
             Date date = new Date();
-            JobExecution jobExecution = jobLauncher.run(job, new JobParametersBuilder()
+            JobExecution jobExecution = jobLauncher.run(importWordsJob, new JobParametersBuilder()
                             .addDate("launchDate", date)
-                            .addString("fullPathFileName","mids.csv")
+                            .addString("fullPathFileName","word.txt")
                             .toJobParameters());
 
             System.out.println("Chello");

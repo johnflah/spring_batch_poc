@@ -98,7 +98,7 @@ public class MidBatchConfig {
     }
 
 
-    @Bean
+    @Bean(name="midJob")
     public Job runJob(){
         return jobBuilderFactory.get("importMerchants").incrementer(new RunIdIncrementer()).flow(importMidStep()).end().build();
     }
