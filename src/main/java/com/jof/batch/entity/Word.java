@@ -15,6 +15,8 @@ public class Word {
     @Column(name = "word")
     private String word;
 
+    @Column(name = "uppercase")
+    private String uppercase;
     @Column(name = "flipped")
     private String flipped;
 }

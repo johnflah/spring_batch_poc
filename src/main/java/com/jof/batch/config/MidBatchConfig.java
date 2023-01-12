@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 
 @Configuration
-@EnableBatchProcessing
 @RequiredArgsConstructor
 @Data
 @Slf4j
@@ -98,7 +97,7 @@ public class MidBatchConfig {
     }
 
 
-    @Bean(name="midJob")
+    @Bean("midjob")
     public Job runJob(){
         return jobBuilderFactory.get("importMerchants").incrementer(new RunIdIncrementer()).flow(importMidStep()).end().build();
     }

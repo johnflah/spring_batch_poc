@@ -1,6 +1,5 @@
 package com.jof.batch.controller;
 
-import com.jof.batch.config.MidBatchConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -28,12 +27,10 @@ public class MidController {
     @Autowired
     JobLauncher jobLauncher;
 
-    @Qualifier("midJob")
-    @Autowired
-    Job job;
 
     @Autowired
-    MidBatchConfig midBatchConfig;
+    @Qualifier("midjob")
+    Job myJob;
 
 
     @PostMapping
@@ -42,7 +39,7 @@ public class MidController {
 
         try {
             Date date = new Date();
-            JobExecution jobExecution = jobLauncher.run(job, new JobParametersBuilder()
+            JobExecution jobExecution = jobLauncher.run(myJob, new JobParametersBuilder()
                             .addDate("launchDate", date)
                             .addString("fullPathFileName","mids.csv")
                             .toJobParameters());

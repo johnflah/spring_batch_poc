@@ -1,6 +1,5 @@
 package com.jof.batch.config.word;
 
-import com.jof.batch.config.MidBatchConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -29,13 +28,12 @@ public class WordController {
     JobLauncher jobLauncher;
 
     @Autowired
-    @Qualifier("importWordsJob")
+    @Qualifier("importwordsjob")
     private Job importWordsJob;
 
     @Autowired
-    @Qualifier("midJob")
-    private Job midJob;
-
+    @Qualifier("midjob")
+    private Job myJob;
 
 
 

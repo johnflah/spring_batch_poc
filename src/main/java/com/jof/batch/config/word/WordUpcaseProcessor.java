@@ -8,9 +8,9 @@ import org.springframework.batch.item.ItemProcessor;
 public class WordUpcaseProcessor implements ItemProcessor<Word,Word> {
     @Override
     public Word process(Word word) throws Exception {
-      log.info("word is {}",word);
-      word.setFlipped(word.getWord().toUpperCase());
-        log.info("word is now {}",word);
+//      log.info("word is {}",word);
+      word.setUppercase(word.getWord().toUpperCase());
+   //     log.info("word is now {}",word);
         return word;
     }
 }
