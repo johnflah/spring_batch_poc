@@ -11,11 +11,10 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.Optional;
 
 
 @RestController
@@ -38,14 +37,15 @@ public class WordController {
 
 
     @PostMapping
-    @RequestMapping("/import")
-    public void startImportCSVJob(){
+    @RequestMapping("/import/{pathparam}")
+    public void startImportCSVJob(@RequestParam(name = "message") Optional<String> message, @PathVariable String pathparam){
 
         try {
             Date date = new Date();
             JobExecution jobExecution = jobLauncher.run(importWordsJob, new JobParametersBuilder()
                             .addDate("launchDate", date)
                             .addString("fullPathFileName","word.txt")
+                            .addString("endsWith", message.orElse(""))
                             .toJobParameters());
 
             System.out.println("Chello");

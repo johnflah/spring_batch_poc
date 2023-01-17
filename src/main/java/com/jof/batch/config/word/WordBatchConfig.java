@@ -1,7 +1,9 @@
 package com.jof.batch.config.word;
 
+import com.jof.batch.config.word.processor.FlippedEndswithProcessor;
 import com.jof.batch.entity.Word;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -19,11 +21,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Sort;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
 
 @Configuration
 @RequiredArgsConstructor
+@Slf4j
 public class WordBatchConfig {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -32,11 +35,13 @@ public class WordBatchConfig {
 
 
     @Bean("importwordsjob")
-    public Job importWords(Step readWordsFromFileAndChangeCaseStep, Step readWordsBackInAndReverseStep ){
+    public Job importWords(Step readWordsFromFileAndChangeCaseStep, Step readWordsBackInAndReverseStep, Step endsWithStep ){
         return jobBuilderFactory.get("importWords")
                 .incrementer(new RunIdIncrementer())
-                .start(readWordsFromFileAndChangeCaseStep)
-                .next(readWordsBackInAndReverseStep)
+                .start(endsWithStep)
+//                .start(readWordsFromFileAndChangeCaseStep)
+//                .next(readWordsBackInAndReverseStep)
+//                .next(endsWithStep)
                 .build();
     }
 
@@ -109,4 +114,52 @@ public class WordBatchConfig {
         return dbReader;
 
     }
+
+
+   @Bean
+   @StepScope
+   public RepositoryItemReader<Word> dbReader(@Value("#{jobParameters['endsWith']}") String endsWith) {
+        String ltr = "ow";
+        log.info(endsWith);
+        RepositoryItemReader<Word> wordRepositoryItemReader = new RepositoryItemReader<>();
+        wordRepositoryItemReader.setRepository(wordRepository);
+        wordRepositoryItemReader.setMethodName("findAllByFlippedEndingWith");
+        Map<String, Sort.Direction> sorts = new HashMap<>();
+        sorts.put("flipped", Sort.Direction.ASC);
+        wordRepositoryItemReader.setSort(sorts);
+
+        List<Object> queryMethodArguments = new ArrayList<>();
+        queryMethodArguments.add(endsWith);
+        wordRepositoryItemReader.setArguments(queryMethodArguments);
+
+
+
+        return wordRepositoryItemReader;
+
+    }
+    @Bean
+    public Step endsWithStep() {
+        return stepBuilderFactory.get("endswith-step").<Word, Word>chunk(10)
+                .reader(dbReader(null))
+                .processor(endsWithProcessor())
+                .writer(wordRepositoryItemWriter())
+                .build();
+
+    }
+
+
+    private RepositoryItemWriter<Word> wordRepositoryItemWriter() {
+
+        RepositoryItemWriter<Word> writer = new RepositoryItemWriter<>();
+        writer.setRepository(wordRepository);
+        writer.setMethodName("save");
+
+        return writer;
+    }
+
+    private FlippedEndswithProcessor endsWithProcessor() {
+        return new FlippedEndswithProcessor();
+    }
+
+
 }

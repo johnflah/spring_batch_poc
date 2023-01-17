@@ -1,7 +1,7 @@
 package com.jof.batch.config;
 
 
-import com.jof.batch.entity.Customer;
+import com.jof.batch.config.word.WordRepository;
 import com.jof.batch.entity.MerchantEnablementStatus;
 import com.jof.batch.repository.MerchantEnablementStatusRepository;
 import lombok.Data;
@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -33,6 +32,7 @@ public class MidBatchConfig {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final MerchantEnablementStatusRepository merchantEnablementStatusRepository;
+    private final WordRepository wordRepository;
 
 
     private String filename;
@@ -78,6 +78,9 @@ public class MidBatchConfig {
     }
 
 
+
+
+
     @Bean
     public MidProcessor midProcessor() {
         return new MidProcessor();
@@ -98,8 +101,10 @@ public class MidBatchConfig {
 
 
     @Bean("midjob")
-    public Job runJob(){
-        return jobBuilderFactory.get("importMerchants").incrementer(new RunIdIncrementer()).flow(importMidStep()).end().build();
+    public Job runJob(Step endsWithStep){
+
+        return jobBuilderFactory.get("importMerchants").incrementer(new RunIdIncrementer())
+                .start(importMidStep()).next(endsWithStep).build();
     }
 
 
