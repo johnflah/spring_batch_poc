@@ -5,11 +5,15 @@ import com.jof.batch.entity.Word;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.DefaultBatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -19,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.domain.Sort;
 
 import java.util.*;
@@ -27,22 +32,41 @@ import java.util.*;
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
-public class WordBatchConfig {
+public class WordBatchConfig extends DefaultBatchConfigurer {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final WordRepository wordRepository;
 
+    @Override
+    public JobLauncher getJobLauncher() {
 
+        try {
+            SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
+            jobLauncher.setJobRepository(getJobRepository());
+            jobLauncher.setTaskExecutor(new SimpleAsyncTaskExecutor());
+            jobLauncher.afterPropertiesSet();
+            return jobLauncher;
+        } catch (Exception e) {
+            log.info("Exception {} : ", e.getMessage());
+            return super.getJobLauncher();
+        }
+
+    }
 
     @Bean("importwordsjob")
     public Job importWords(Step readWordsFromFileAndChangeCaseStep, Step readWordsBackInAndReverseStep, Step endsWithStep ){
         return jobBuilderFactory.get("importWords")
                 .incrementer(new RunIdIncrementer())
-                .start(endsWithStep)
-//                .start(readWordsFromFileAndChangeCaseStep)
-//                .next(readWordsBackInAndReverseStep)
-//                .next(endsWithStep)
+                .listener(listener())
+//                .start(endsWithStep)
+                .start(readWordsFromFileAndChangeCaseStep)
+                .next(readWordsBackInAndReverseStep)
+                .next(endsWithStep)
                 .build();
+    }
+
+    private JobExecutionListener listener() {
+        return new WordListener();
     }
 
     //Step Definition

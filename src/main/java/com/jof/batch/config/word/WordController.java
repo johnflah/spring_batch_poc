@@ -11,6 +11,7 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -38,7 +39,7 @@ public class WordController {
 
     @PostMapping
     @RequestMapping("/import/{pathparam}")
-    public void startImportCSVJob(@RequestParam(name = "message") Optional<String> message, @PathVariable String pathparam){
+    public ResponseEntity<?> startImportCSVJob(@RequestParam(name = "message") Optional<String> message, @PathVariable String pathparam){
 
         try {
             Date date = new Date();
@@ -47,8 +48,8 @@ public class WordController {
                             .addString("fullPathFileName","word.txt")
                             .addString("endsWith", message.orElse(""))
                             .toJobParameters());
-
             System.out.println("Chello");
+            return ResponseEntity.ok(jobExecution);
         } catch (JobExecutionAlreadyRunningException e) {
             throw new RuntimeException(e);
         } catch (JobRestartException e) {
