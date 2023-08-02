@@ -21,7 +21,7 @@ public class DummyCustomerChangeProcessor implements ItemProcessor<Customer, Dum
 
         DummyCustomer dc = new DummyCustomer();
         dc.setName(customer.getFirstName());
-        log.info("", dc);
+        log.info("cus", dc);
         return dc;
     }
 
